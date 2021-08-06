@@ -1,5 +1,6 @@
 import json
 import os
+import sys
 from pathlib import Path
 import traceback
 from typing import List, Tuple
@@ -59,6 +60,12 @@ def hide(ctx: CLIContext, folder: str, password: str, output: str):
     target_dir = Path("." + random_str(8))
     target_dir.mkdir(exist_ok=True)
     info("Target directory: " + str(target_dir))
+
+    if sys.platform == "win32":
+        import ctypes
+
+        info("WIN: Marking folder as hidden")
+        ctypes.windll.kernel32.SetFileAttributesW(str(target_dir.resolve()), 0x2)
 
     output_datas: List[Tuple[str, str]] = []
     used_strs: List[str] = []
