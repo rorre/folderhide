@@ -38,13 +38,25 @@ def cli(ctx: CLIContext, dbg: bool):
     ),
 )
 @click.argument("password")
+@click.option(
+    "--output-file",
+    "-o",
+    "output",
+    default="cfg.enc",
+    help="The output data path. This file tells the program how to unhide your folder.",
+    type=click.Path(
+        exists=False,
+        file_okay=True,
+        dir_okay=False,
+    ),
+)
 @click.pass_context
-def hide(ctx: CLIContext, folder: str, password: str):
+def hide(ctx: CLIContext, folder: str, password: str, output: str):
     files = get_all_files(folder)
     if ctx.obj["debug"]:
         debug("Total files: " + str(len(files)))
 
-    target_dir = Path(random_str(8))
+    target_dir = Path("." + random_str(8))
     target_dir.mkdir(exist_ok=True)
     info("Target directory: " + str(target_dir))
 
@@ -79,11 +91,14 @@ def hide(ctx: CLIContext, folder: str, password: str):
         text, tag = (json.dumps(output_datas).encode(), "empty16bytesdata".encode())
 
     info("Writing config")
-    with open("cfg.enc", "wb") as f:
+    with open(output, "wb") as f:
         [f.write(x) for x in (cipher.nonce, tag, text)]
 
     info("Done!")
-    info("Config available at: cfg.enc")
+    info("Config available at: " + output)
+    info("Hidden folder: " + str(target_dir))
+    info("Please keep this file safe. This file is important for the unhide process.")
+    info("The file also needs to be in the same directory as the folder.")
 
 
 @cli.command(name="unhide", help="Unhide the folder from config.")
@@ -131,6 +146,6 @@ def unhide(ctx: CLIContext, password: str, config: str):
         revert_unhide(data, ctx.obj["debug"])
         return
 
-    os.rmdir(src[:8])
+    os.rmdir(src[:9])
     os.remove(config)
     info("Done!")
