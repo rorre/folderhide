@@ -1,25 +1,21 @@
 import json
 import os
-import shutil
 from pathlib import Path
+import traceback
 from typing import List, Tuple
 
 import click
 
 from folderhide.typing import CLIContext
 from folderhide.utils import get_all_files, get_crypto, random_str
-
-
-def error(msg: str):
-    click.echo(click.style("[ERR]", fg="red") + " " + msg)
-
-
-def debug(msg: str):
-    click.echo(click.style("[DBG]", fg="blue") + " " + msg)
-
-
-def info(msg: str):
-    click.echo("[INFO] " + msg)
+from folderhide.cli.utils import (
+    info,
+    debug,
+    error,
+    revert_hide,
+    revert_unhide,
+    move_file,
+)
 
 
 @click.group()
@@ -56,22 +52,24 @@ def hide(ctx: CLIContext, folder: str, password: str):
     used_strs: List[str] = []
 
     info("Hiding files")
-    with click.progressbar(files) as bar:
-        file: str
-        for file in bar:
-            fname = random_str(16)
-            while fname in used_strs:
+    try:
+        with click.progressbar(files) as bar:
+            src: str
+            for src in bar:
                 fname = random_str(16)
+                while fname in used_strs:
+                    fname = random_str(16)
 
-            target_path = target_dir / fname
-            shutil.move(file, target_path)
-            if ctx.obj["debug"]:
-                debug("Move:")
-                debug("  - Source: " + file)
-                debug("  - Target: " + str(target_path))
+                dest = target_dir / fname
+                move_file(src, dest, ctx.obj["debug"])
 
-            output_datas.append((file, str(target_path)))
-            used_strs.append(fname)
+                output_datas.append((src, str(dest)))
+                used_strs.append(fname)
+    except Exception:
+        error("An exception has occured.")
+        traceback.print_exc()
+        revert_hide(output_datas, ctx.obj["debug"])
+        return
 
     cipher = get_crypto(password)
     if not ctx.obj["debug"]:
@@ -121,18 +119,17 @@ def unhide(ctx: CLIContext, password: str, config: str):
     data: List[Tuple[str, str]] = json.loads(text_data.decode())
 
     info("Unhiding files")
-    with click.progressbar(data) as bar:
-        src: str
-        dest: str
-        for dest, src in bar:
-            if ctx.obj["debug"]:
-                debug("Move:")
-                debug("  - Source: " + src)
-                debug("  - Target: " + dest)
-
-            target_path = Path(dest)
-            target_path.parent.mkdir(parents=True, exist_ok=True)
-            shutil.move(src, dest)
+    try:
+        with click.progressbar(data) as bar:
+            src: str
+            dest: str
+            for dest, src in bar:
+                move_file(src, dest, ctx.obj["debug"])
+    except Exception:
+        error("An error has occured.")
+        traceback.print_exc()
+        revert_unhide(data, ctx.obj["debug"])
+        return
 
     os.rmdir(src[:8])
     os.remove(config)
