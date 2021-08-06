@@ -2,7 +2,7 @@ import json
 import os
 import shutil
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import List, Tuple
 
 import click
 
@@ -94,6 +94,7 @@ def hide(ctx: CLIContext, folder: str, password: str):
     "--config",
     "-c",
     help="Config to load from.",
+    default="cfg.enc",
     type=click.Path(
         exists=True,
         file_okay=True,
@@ -101,9 +102,9 @@ def hide(ctx: CLIContext, folder: str, password: str):
     ),
 )
 @click.pass_context
-def unhide(ctx: CLIContext, password: str, config: Optional[str]):
+def unhide(ctx: CLIContext, password: str, config: str):
     info("Loading config")
-    with open(config or "cfg.enc", "rb") as f:
+    with open(config, "rb") as f:
         nonce, tag, ciphertext = [f.read(x) for x in (16, 16, -1)]
     cipher = get_crypto(password, nonce=nonce)
 
@@ -134,4 +135,5 @@ def unhide(ctx: CLIContext, password: str, config: Optional[str]):
             shutil.move(src, dest)
 
     os.rmdir(src[:8])
+    os.remove(config)
     info("Done!")
