@@ -72,7 +72,7 @@ def hide(ctx: CLIContext, folder: str, password: str, output: str):
 
     info("Hiding files")
     try:
-        with click.progressbar(files) as bar:
+        with click.progressbar(files, width=0, show_pos=True) as bar:
             src: str
             for src in bar:
                 fname = random_str(16)
@@ -142,7 +142,7 @@ def unhide(ctx: CLIContext, password: str, config: str):
 
     info("Unhiding files")
     try:
-        with click.progressbar(data) as bar:
+        with click.progressbar(data, width=0, show_pos=True) as bar:
             src: str
             dest: str
             for dest, src in bar:
