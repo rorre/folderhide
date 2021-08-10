@@ -5,6 +5,8 @@ import sys
 from typing import List, Tuple
 from folderhide.gui.utils import info, move_file
 import json
+import os
+from folderhide.typing import MoveData
 
 
 class HideThread(QThread):
@@ -69,3 +71,37 @@ class HideThread(QThread):
         self.log.emit(
             info("The file also needs to be in the same directory as the folder.")
         )
+
+
+class UnhideThread(QThread):
+    _progress = 0
+    progress = pyqtSignal(int)
+    total = pyqtSignal(int)
+    log = pyqtSignal(str)
+
+    def __init__(self, configFile: str, password: str, *args, **kwargs):
+        self._configFile = configFile
+        self._password = password
+        super().__init__(*args, **kwargs)
+
+    def run(self):
+        self.log.emit(info("Reading config"))
+        with open(self._configFile, "rb") as f:
+            nonce, tag, ciphertext = [f.read(x) for x in (16, 16, -1)]
+
+        self.log.emit(info("Decrypting config"))
+        cipher = get_crypto(self._password, nonce=nonce)
+        text_data = cipher.decrypt_and_verify(ciphertext, tag)
+
+        self.log.emit(info("Loading config"))
+        data: MoveData = json.loads(text_data.decode())
+
+        self.log.emit(info("Unhiding files"))
+        for dest, src in data:
+            move_file(src, dest)
+
+        if src:
+            os.rmdir(src[:9])
+            os.remove(self._configFile)
+
+        self.log.emit(info("Done!"))

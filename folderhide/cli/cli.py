@@ -122,7 +122,7 @@ def hide(ctx: CLIContext, folder: str, password: str, output: str):
 )
 @click.pass_context
 def unhide(ctx: CLIContext, password: str, config: str):
-    info("Loading config")
+    info("Reading config")
     with open(config, "rb") as f:
         nonce, tag, ciphertext = [f.read(x) for x in (16, 16, -1)]
     cipher = get_crypto(password, nonce=nonce)
