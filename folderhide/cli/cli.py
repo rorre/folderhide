@@ -13,8 +13,7 @@ from folderhide.cli.utils import (
     info,
     debug,
     error,
-    revert_hide,
-    revert_unhide,
+    revert,
     move_file,
 )
 
@@ -87,7 +86,7 @@ def hide(ctx: CLIContext, folder: str, password: str, output: str):
     except Exception:
         error("An exception has occured.")
         traceback.print_exc()
-        revert_hide(output_datas, ctx.obj["debug"])
+        revert(output_datas, ctx.obj["debug"])
         return
 
     cipher = get_crypto(password)
@@ -141,16 +140,18 @@ def unhide(ctx: CLIContext, password: str, config: str):
     data: MoveData = json.loads(text_data.decode())
 
     info("Unhiding files")
+    restored_data: MoveData = []
     try:
         with click.progressbar(data, width=0, show_pos=True) as bar:
             src: str
             dest: str
             for dest, src in bar:
                 move_file(src, dest, ctx.obj["debug"])
+                restored_data.append((src, dest))
     except Exception:
         error("An error has occured.")
         traceback.print_exc()
-        revert_unhide(data, ctx.obj["debug"])
+        revert(restored_data, ctx.obj["debug"])
         return
 
     os.rmdir(src[:9])

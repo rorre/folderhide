@@ -30,13 +30,7 @@ def move_file(src: PathType, dest: PathType, dbg: bool):
     shutil.move(src, dest)
 
 
-def revert_hide(datas: List[Tuple[str, str]], dbg: bool = False):
+def revert(datas: List[Tuple[str, str]], dbg: bool = False):
     info("Reverting files")
     for dest, src in datas:
-        move_file(src, dest, dbg)
-
-
-def revert_unhide(datas: List[Tuple[str, str]], dbg: bool = False):
-    info("Reverting files")
-    for src, dest in datas:
         move_file(src, dest, dbg)
