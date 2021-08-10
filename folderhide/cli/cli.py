@@ -3,11 +3,11 @@ import os
 import sys
 from pathlib import Path
 import traceback
-from typing import List, Tuple
+from typing import List
 
 import click
 
-from folderhide.typing import CLIContext
+from folderhide.typing import CLIContext, MoveData
 from folderhide.utils import get_all_files, get_crypto, random_str
 from folderhide.cli.utils import (
     info,
@@ -67,7 +67,7 @@ def hide(ctx: CLIContext, folder: str, password: str, output: str):
         info("WIN: Marking folder as hidden")
         ctypes.windll.kernel32.SetFileAttributesW(str(target_dir.resolve()), 0x2)
 
-    output_datas: List[Tuple[str, str]] = []
+    output_datas: MoveData = []
     used_strs: List[str] = []
 
     info("Hiding files")
@@ -138,7 +138,7 @@ def unhide(ctx: CLIContext, password: str, config: str):
         text_data = ciphertext
 
     info("Loading config")
-    data: List[Tuple[str, str]] = json.loads(text_data.decode())
+    data: MoveData = json.loads(text_data.decode())
 
     info("Unhiding files")
     try:
