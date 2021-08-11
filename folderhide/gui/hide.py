@@ -20,8 +20,13 @@ def isValidFolder(folder):
     return os.path.exists(folder) and os.path.isdir(folder)
 
 
+def isValidFile(f):
+    return os.path.exists(f) and os.path.isfile(f)
+
+
 class Hide(QWidget):
     targetFolder: Optional[str] = None
+    targetPath: Optional[str] = None
     workingThread: Optional[HideThread] = None
 
     def __init__(self, parent=None):
@@ -34,13 +39,19 @@ class Hide(QWidget):
         self.createLogArea()
         self.createPasswordRow()
         self.createFolderSelect()
+        self.createConfigRow()
 
         textGridLayout = QGridLayout()
         textGridLayout.addWidget(self.folderWidgetLabel, 0, 0)
         textGridLayout.addWidget(self.folderPathWidget, 0, 1)
         textGridLayout.addWidget(self.folderSelectButton, 0, 2)
-        textGridLayout.addWidget(self.passwordLabel, 1, 0, 1, 1)
-        textGridLayout.addWidget(self.passwordBar, 1, 1, 1, 2)
+
+        textGridLayout.addWidget(self.configWidgetLabel, 1, 0)
+        textGridLayout.addWidget(self.configPathWidget, 1, 1)
+        textGridLayout.addWidget(self.configSelectButton, 1, 2)
+
+        textGridLayout.addWidget(self.passwordLabel, 2, 0, 1, 1)
+        textGridLayout.addWidget(self.passwordBar, 2, 1, 1, 2)
 
         mainLayout = QVBoxLayout()
         mainLayout.addLayout(textGridLayout)
@@ -54,6 +65,14 @@ class Hide(QWidget):
         password = self.passwordBar.text()
         if not password:
             QMessageBox.critical(self, "Error", "Password is empty.")
+            return
+
+        if not self.targetFolder:
+            QMessageBox.critical(self, "Error", "No folder selected to hide.")
+            return
+
+        if not self.targetPath:
+            QMessageBox.critical(self, "Error", "Output config path is empty.")
             return
 
         self.workingThread = HideThread(self.targetFolder, password)
@@ -76,11 +95,37 @@ class Hide(QWidget):
             return
         self.targetFolder = targetFolder
 
+    def _setConfigPath(self):
+        self.progressBar.reset()
+
+        targetPath, _ = QFileDialog.getSaveFileName(
+            caption="Save config to...", filter="Encrypted Config File (*.enc)"
+        )
+        if isValidFile(targetPath):
+            answer = QMessageBox.question(
+                self,
+                "File already exists.",
+                f"File {targetPath} already exists. Are you sure you want to replace it?",
+            )
+            if answer != QMessageBox.Yes:
+                return
+
+        self.targetPath = targetPath
+
     def _reset(self):
         self.targetFolder = None
+        self.targetPath = None
         self.folderPathWidget.setText("")
+        self.configPathWidget.setText("")
         self.passwordBar.setText("")
         self.logArea.setText("")
+
+    def createConfigRow(self):
+        self.configWidgetLabel = QLabel("Config output")
+        self.configPathWidget = QLineEdit()
+        self.configPathWidget.setReadOnly(True)
+        self.configSelectButton = QPushButton("Browse")
+        self.configSelectButton.clicked.connect(self._setConfigPath)
 
     def createButtons(self):
         startButton = QPushButton("Start")

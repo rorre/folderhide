@@ -15,14 +15,15 @@ class HideThread(QThread):
     total = pyqtSignal(int)
     log = pyqtSignal(str)
 
-    def __init__(self, targetFolder: str, password: str, *args, **kwargs):
+    def __init__(
+        self, targetFolder: str, password: str, configPath: str, *args, **kwargs
+    ):
         self._targetFolder = targetFolder
         self._password = password
+        self._configPath = configPath
         super().__init__(*args, **kwargs)
 
     def run(self):
-        output = "cfg.enc"
-
         self.log.emit(info("Getting all files"))
         files = get_all_files(self._targetFolder)
         self.total.emit(len(files))
@@ -57,11 +58,11 @@ class HideThread(QThread):
         text, tag = cipher.encrypt_and_digest(json.dumps(output_datas).encode())
 
         self.log.emit(info("Writing config"))
-        with open(output, "wb") as f:
+        with open(self._configPath, "wb") as f:
             [f.write(x) for x in (cipher.nonce, tag, text)]
 
         self.log.emit(info("Done!"))
-        self.log.emit(info("Config available at: " + output))
+        self.log.emit(info("Config available at: " + self._configPath))
         self.log.emit(info("Hidden folder: " + str(target_dir)))
         self.log.emit(
             info(
