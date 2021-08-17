@@ -56,6 +56,10 @@ class Unhide(QWidget):
             QMessageBox.critical(self, "Error", "Password is empty.")
             return
 
+        if not self.configFile:
+            QMessageBox.critical(self, "Error", "No config file selected.")
+            return
+
         self.workingThread = UnhideThread(self.configFile, password)
         self.workingThread.total.connect(self.progressBar.setMaximum)
         self.workingThread.progress.connect(self.progressBar.setValue)
