@@ -16,6 +16,7 @@ class Main(QMainWindow):
         self.tabWidget.addTab(self.unhideWidget, "Unhide")
         self.setCentralWidget(self.tabWidget)
 
+        self.setWindowTitle("FolderHide GUI")
         self.setMinimumSize(800, 600)
 
 
