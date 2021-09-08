@@ -111,6 +111,7 @@ class Hide(QWidget):
                 return
 
         self.targetPath = targetPath
+        self.configPathWidget.setText(targetPath)
 
     def _reset(self):
         self.targetFolder = None
@@ -144,6 +145,7 @@ class Hide(QWidget):
     def createPasswordRow(self):
         self.passwordLabel = QLabel("Password")
         self.passwordBar = QLineEdit()
+        self.passwordBar.setEchoMode(QLineEdit.Password)
 
     def createFolderSelect(self):
         """Creates the folder selection layout."""

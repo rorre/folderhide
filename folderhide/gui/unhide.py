@@ -103,6 +103,7 @@ class Unhide(QWidget):
     def createPasswordRow(self):
         self.passwordLabel = QLabel("Password")
         self.passwordBar = QLineEdit()
+        self.passwordBar.setEchoMode(QLineEdit.Password)
 
     def createFileSelect(self):
         """Creates the folder selection layout."""
