@@ -13,6 +13,7 @@ from PyQt5.QtWidgets import (
     QDialogButtonBox,
     QGridLayout,
 )
+from folderhide.gui.utils import PasswordBar
 from folderhide.gui.workers import HideThread
 
 
@@ -144,8 +145,7 @@ class Hide(QWidget):
 
     def createPasswordRow(self):
         self.passwordLabel = QLabel("Password")
-        self.passwordBar = QLineEdit()
-        self.passwordBar.setEchoMode(QLineEdit.Password)
+        self.passwordBar = PasswordBar()
 
     def createFolderSelect(self):
         """Creates the folder selection layout."""

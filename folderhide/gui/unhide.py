@@ -1,3 +1,4 @@
+from folderhide.gui.utils import PasswordBar
 import os
 from typing import Optional
 from PyQt5.QtWidgets import (
@@ -102,8 +103,7 @@ class Unhide(QWidget):
 
     def createPasswordRow(self):
         self.passwordLabel = QLabel("Password")
-        self.passwordBar = QLineEdit()
-        self.passwordBar.setEchoMode(QLineEdit.Password)
+        self.passwordBar = PasswordBar()
 
     def createFileSelect(self):
         """Creates the folder selection layout."""
