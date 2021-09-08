@@ -1,6 +1,6 @@
-from typing import TypedDict
+from typing import List, Tuple, TypedDict
+
 from click import Context
-from typing import List, Tuple
 
 
 class ObjContext(TypedDict):

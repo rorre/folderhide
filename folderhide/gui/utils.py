@@ -1,9 +1,9 @@
 import shutil
-
 from pathlib import Path
 from typing import Union
-from PyQt5.QtWidgets import QLineEdit
+
 from PyQt5 import QtCore
+from PyQt5.QtWidgets import QLineEdit
 
 PathType = Union[str, Path]
 

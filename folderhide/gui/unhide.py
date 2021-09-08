@@ -1,19 +1,21 @@
-from folderhide.gui.utils import PasswordBar
 import os
 from typing import Optional
+
 from PyQt5.QtWidgets import (
-    QWidget,
-    QFileDialog,
-    QPushButton,
-    QLineEdit,
-    QProgressBar,
-    QVBoxLayout,
-    QLabel,
-    QMessageBox,
-    QTextEdit,
     QDialogButtonBox,
+    QFileDialog,
     QGridLayout,
+    QLabel,
+    QLineEdit,
+    QMessageBox,
+    QProgressBar,
+    QPushButton,
+    QTextEdit,
+    QVBoxLayout,
+    QWidget,
 )
+
+from folderhide.gui.utils import PasswordBar
 from folderhide.gui.workers import UnhideThread
 
 

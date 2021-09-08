@@ -1,21 +1,15 @@
 import json
 import os
 import sys
-from pathlib import Path
 import traceback
+from pathlib import Path
 from typing import List
 
 import click
 
+from folderhide.cli.utils import debug, error, info, move_file, revert
 from folderhide.typing import CLIContext, MoveData
 from folderhide.utils import get_all_files, get_crypto, random_str
-from folderhide.cli.utils import (
-    info,
-    debug,
-    error,
-    revert,
-    move_file,
-)
 
 
 @click.group()

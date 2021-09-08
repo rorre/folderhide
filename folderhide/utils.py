@@ -1,9 +1,10 @@
+import random
 import string
+from pathlib import Path
 from typing import List, Optional, Union, cast
+
 from Crypto.Cipher import AES
 from Crypto.Protocol.KDF import scrypt
-import random
-from pathlib import Path
 
 random.seed("folderhide")
 salt = random.randbytes(16)

@@ -1,8 +1,8 @@
-import click
 import shutil
-
 from pathlib import Path
 from typing import List, Tuple, Union
+
+import click
 
 PathType = Union[str, Path]
 

@@ -1,12 +1,14 @@
-from PyQt5.QtCore import QThread, pyqtSignal
-from folderhide.utils import get_all_files, get_crypto, random_str
-from pathlib import Path
-import sys
-from typing import List, Tuple
-from folderhide.gui.utils import info, move_file
 import json
 import os
+import sys
+from pathlib import Path
+from typing import List, Tuple
+
+from PyQt5.QtCore import QThread, pyqtSignal
+
+from folderhide.gui.utils import info, move_file
 from folderhide.typing import MoveData
+from folderhide.utils import get_all_files, get_crypto, random_str
 
 
 class HideThread(QThread):

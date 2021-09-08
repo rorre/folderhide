@@ -1,7 +1,7 @@
-from PyQt5.QtWidgets import QApplication
+from PyQt5.QtWidgets import QApplication, QMainWindow, QTabWidget
+
 from folderhide.gui.hide import Hide
 from folderhide.gui.unhide import Unhide
-from PyQt5.QtWidgets import QMainWindow, QTabWidget
 
 
 class Main(QMainWindow):
