@@ -52,6 +52,8 @@ class HideThread(QThread):
 
             output_datas.append((src, str(dest)))
             used_strs.append(fname)
+            self._progress += 1
+            self.progress.emit(self._progress)
 
         self.log.emit(info("Encypting config"))
         cipher = get_crypto(self._password)
@@ -96,10 +98,13 @@ class UnhideThread(QThread):
 
         self.log.emit(info("Loading config"))
         data: MoveData = json.loads(text_data.decode())
+        self.total.emit(len(data))
 
         self.log.emit(info("Unhiding files"))
         for dest, src in data:
             move_file(src, dest)
+            self._progress += 1
+            self.progress.emit(self._progress)
 
         if src:
             os.rmdir(src[:9])
