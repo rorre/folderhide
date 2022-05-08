@@ -3,13 +3,18 @@ import os
 import sys
 import traceback
 from pathlib import Path
-from typing import List
 
 import click
 
 from folderhide.cli.utils import debug, error, info, move_file, revert
 from folderhide.typing import CLIContext, MoveData
-from folderhide.utils import get_all_files, get_crypto, random_str
+from folderhide.utils import (
+    FileMetadata,
+    generate_config,
+    get_all_files,
+    get_crypto,
+    random_str,
+)
 
 
 @click.group()
@@ -60,28 +65,8 @@ def hide(ctx: CLIContext, folder: str, password: str, output: str):
         info("WIN: Marking folder as hidden")
         ctypes.windll.kernel32.SetFileAttributesW(str(target_dir.resolve()), 0x2)
 
-    output_datas: MoveData = []
-    used_strs: List[str] = []
-
-    info("Hiding files")
-    try:
-        with click.progressbar(files, width=0, show_pos=True) as bar:
-            src: str
-            for src in bar:
-                fname = random_str(16)
-                while fname in used_strs:
-                    fname = random_str(16)
-
-                dest = target_dir / fname
-                move_file(src, dest, ctx.obj["debug"])
-
-                output_datas.append((src, str(dest)))
-                used_strs.append(fname)
-    except Exception:
-        error("An exception has occured.")
-        traceback.print_exc()
-        revert(output_datas, ctx.obj["debug"])
-        return
+    info("Generating paths")
+    output_datas = generate_config(files)
 
     cipher = get_crypto(password)
     if not ctx.obj["debug"]:
@@ -93,6 +78,20 @@ def hide(ctx: CLIContext, folder: str, password: str, output: str):
     info("Writing config")
     with open(output, "wb") as f:
         [f.write(x) for x in (cipher.nonce, tag, text)]
+
+    info("Hiding files")
+    try:
+        with click.progressbar(output_datas, width=0, show_pos=True) as bar:
+            cfg: FileMetadata
+            for cfg in bar:
+                dest = target_dir / cfg.modified
+                move_file(cfg.original, dest, ctx.obj["debug"])
+
+    except Exception:
+        error("An exception has occured.")
+        traceback.print_exc()
+        revert(output_datas, ctx.obj["debug"])
+        return
 
     info("Done!")
     info("Config available at: " + output)

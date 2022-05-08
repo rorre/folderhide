@@ -2,13 +2,12 @@ import json
 import os
 import sys
 from pathlib import Path
-from typing import List, Tuple
 
 from PyQt5.QtCore import QThread, pyqtSignal
 
 from folderhide.gui.utils import info, move_file
 from folderhide.typing import MoveData
-from folderhide.utils import get_all_files, get_crypto, random_str
+from folderhide.utils import generate_config, get_all_files, get_crypto, random_str
 
 
 class HideThread(QThread):
@@ -40,22 +39,8 @@ class HideThread(QThread):
             self.log.emit(info("WIN: Marking folder as hidden"))
             ctypes.windll.kernel32.SetFileAttributesW(str(target_dir.resolve()), 0x2)
 
-        output_datas: List[Tuple[str, str]] = []
-        used_strs: List[str] = []
-
-        self.log.emit(info("Hiding files"))
-        for src in files:
-            fname = random_str(16)
-            while fname in used_strs:
-                fname = random_str(16)
-
-            dest = target_dir / fname
-            move_file(src, dest)
-
-            output_datas.append((src, str(dest)))
-            used_strs.append(fname)
-            self._progress += 1
-            self.progress.emit(self._progress)
+        self.log.emit(info("Generating paths"))
+        output_datas = generate_config(files)
 
         self.log.emit(info("Encypting config"))
         cipher = get_crypto(self._password)
@@ -64,6 +49,14 @@ class HideThread(QThread):
         self.log.emit(info("Writing config"))
         with open(self._configPath, "wb") as f:
             [f.write(x) for x in (cipher.nonce, tag, text)]
+
+        self.log.emit(info("Hiding files"))
+        for cfg in output_datas:
+            dest = target_dir / cfg.modified
+            move_file(cfg.original, dest)
+
+            self._progress += 1
+            self.progress.emit(self._progress)
 
         self.log.emit(info("Done!"))
         self.log.emit(info("Config available at: " + self._configPath))

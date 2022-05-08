@@ -1,13 +1,18 @@
 import random
 import string
 from pathlib import Path
-from typing import List, Optional, Union, cast
+from typing import List, Optional, Union, cast, NamedTuple
 
 from Crypto.Cipher import AES
 from Crypto.Protocol.KDF import scrypt
 
 random.seed("folderhide")
 salt = random.randbytes(16)
+
+
+class FileMetadata(NamedTuple):
+    original: str
+    modified: str
 
 
 def get_crypto(password: str, nonce: Optional[bytes] = None):
@@ -43,3 +48,18 @@ def random_str(N: int = 8):
         )
         for _ in range(N)
     )
+
+
+def generate_config(files: List[str]):
+    output_datas: List[FileMetadata] = []
+    used_strs: List[str] = []
+
+    for src in files:
+        new_fname = random_str(16)
+        while new_fname in used_strs:
+            new_fname = random_str(16)
+
+        output_datas.append(FileMetadata(src, new_fname))
+        used_strs.append(new_fname)
+
+    return output_datas
