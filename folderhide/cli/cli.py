@@ -66,7 +66,7 @@ def hide(ctx: CLIContext, folder: str, password: str, output: str):
         ctypes.windll.kernel32.SetFileAttributesW(str(target_dir.resolve()), 0x2)
 
     info("Generating paths")
-    output_datas = generate_config(files)
+    output_datas = generate_config(files, target_dir)
 
     cipher = get_crypto(password)
     if not ctx.obj["debug"]:
@@ -84,8 +84,7 @@ def hide(ctx: CLIContext, folder: str, password: str, output: str):
         with click.progressbar(output_datas, width=0, show_pos=True) as bar:
             cfg: FileMetadata
             for cfg in bar:
-                dest = target_dir / cfg.modified
-                move_file(cfg.original, dest, ctx.obj["debug"])
+                move_file(cfg.original, cfg.modified, ctx.obj["debug"])
 
     except Exception:
         error("An exception has occured.")

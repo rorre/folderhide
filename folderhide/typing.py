@@ -2,6 +2,8 @@ from typing import List, Tuple, TypedDict
 
 from click import Context
 
+from folderhide.utils import FileMetadata
+
 
 class ObjContext(TypedDict):
     debug: bool
@@ -11,4 +13,4 @@ class CLIContext(Context):
     obj: ObjContext
 
 
-MoveData = List[Tuple[str, str]]
+MoveData = List[FileMetadata]

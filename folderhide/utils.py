@@ -50,7 +50,7 @@ def random_str(N: int = 8):
     )
 
 
-def generate_config(files: List[str]):
+def generate_config(files: List[str], target_dir: Path):
     output_datas: List[FileMetadata] = []
     used_strs: List[str] = []
 
@@ -59,7 +59,8 @@ def generate_config(files: List[str]):
         while new_fname in used_strs:
             new_fname = random_str(16)
 
-        output_datas.append(FileMetadata(src, new_fname))
+        new_path = target_dir / new_fname
+        output_datas.append(FileMetadata(src, str(new_path)))
         used_strs.append(new_fname)
 
     return output_datas

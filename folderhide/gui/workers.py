@@ -40,7 +40,7 @@ class HideThread(QThread):
             ctypes.windll.kernel32.SetFileAttributesW(str(target_dir.resolve()), 0x2)
 
         self.log.emit(info("Generating paths"))
-        output_datas = generate_config(files)
+        output_datas = generate_config(files, target_dir)
 
         self.log.emit(info("Encypting config"))
         cipher = get_crypto(self._password)
@@ -52,8 +52,7 @@ class HideThread(QThread):
 
         self.log.emit(info("Hiding files"))
         for cfg in output_datas:
-            dest = target_dir / cfg.modified
-            move_file(cfg.original, dest)
+            move_file(cfg.original, cfg.modified)
 
             self._progress += 1
             self.progress.emit(self._progress)
