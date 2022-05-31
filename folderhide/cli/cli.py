@@ -4,6 +4,17 @@ from folderhide.core import hide as hide_core
 from folderhide.core import unhide as unhide_core
 from folderhide.cli.utils import debug, error, info
 from folderhide.typing import CLIContext
+from tqdm import tqdm
+
+pbar = None
+
+
+def on_progress(current: int, total: int):
+    global pbar
+    if pbar is None:
+        pbar = tqdm(total=total)
+
+    pbar.update(current)
 
 
 @click.group()
@@ -44,7 +55,8 @@ def hide(ctx: CLIContext, folder: str, password: str, output: str):
         if ctx.obj["debug"]:
             debug(x)
 
-    hide_core(folder, password, output, info, on_debug, error)
+    print(folder)
+    hide_core(folder, password, output, info, on_debug, error, on_progress)
 
 
 @cli.command(name="unhide", help="Unhide the folder from config.")
@@ -66,4 +78,4 @@ def unhide(ctx: CLIContext, password: str, config: str):
         if ctx.obj["debug"]:
             debug(x)
 
-    unhide_core(password, config, info, on_debug, error)
+    unhide_core(password, config, info, on_debug, error, on_progress)
