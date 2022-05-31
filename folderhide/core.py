@@ -5,8 +5,6 @@ import traceback
 from pathlib import Path
 from typing import Callable
 
-import click
-
 from folderhide.typing import MoveData
 from folderhide.utils import (
     FileMetadata,
@@ -27,6 +25,7 @@ def hide(
     info_func: LogFunction,
     debug_func: LogFunction,
     error_func: LogFunction,
+    progress_func: Callable[[int, int], None],
 ):
     base_folder = Path(folder).parent
     files = get_all_files(folder, base_folder)
@@ -55,11 +54,12 @@ def hide(
     info_func("Hiding files")
     output_folder = Path(output).parent
     (output_folder / target_dir).mkdir(parents=True, exist_ok=True)
+
     try:
-        with click.progressbar(output_datas, width=0, show_pos=True) as bar:
-            cfg: FileMetadata
-            for cfg in bar:
-                move_file(base_folder / cfg.original, output_folder / cfg.modified)
+        total_length = len(output_datas)
+        for i, cfg in enumerate(output_datas):
+            move_file(base_folder / cfg.original, output_folder / cfg.modified)
+            progress_func(i, total_length)
 
     except Exception:
         error_func("An exception has occured.")
@@ -81,6 +81,7 @@ def unhide(
     info_func: LogFunction,
     debug_func: LogFunction,
     error_func: LogFunction,
+    progress_func: Callable[[int, int], None],
 ):
     info_func("Reading config")
     with open(config, "rb") as f:
@@ -99,14 +100,13 @@ def unhide(
 
     info_func("Unhiding files")
     config_folder = Path(config).parent
-    restored_data: MoveData = []
 
     try:
-        with click.progressbar(data, width=0, show_pos=True) as bar:
-            for cfg in bar:
-                cfg = FileMetadata(*cfg)
-                move_file(config_folder / cfg.modified, config_folder / cfg.original)
-                restored_data.append(cfg)
+        total_length = len(data)
+        for i, cfg in enumerate(data):
+            cfg = FileMetadata(*cfg)
+            move_file(config_folder / cfg.modified, config_folder / cfg.original)
+            progress_func(i, total_length)
 
     except Exception:
         error_func("An error has occured.")
