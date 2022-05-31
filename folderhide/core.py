@@ -103,7 +103,7 @@ def unhide(
 
     try:
         total_length = len(data)
-        for i, cfg in enumerate(data):
+        for i, cfg in enumerate(data, 1):
             cfg = FileMetadata(*cfg)
             move_file(config_folder / cfg.modified, config_folder / cfg.original)
             progress_func(i, total_length)
