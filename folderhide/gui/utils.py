@@ -2,8 +2,8 @@ import shutil
 from pathlib import Path
 from typing import Union
 
-from PyQt5 import QtCore
-from PyQt5.QtWidgets import QLineEdit
+from PyQt6 import QtCore
+from PyQt6.QtWidgets import QLineEdit
 
 PathType = Union[str, Path]
 
@@ -29,20 +29,20 @@ def move_file(src: PathType, dest: PathType):
 class PasswordBar(QLineEdit):
     def __init__(self):
         super().__init__()
-        self.setEchoMode(QLineEdit.Password)
+        self.setEchoMode(QLineEdit.EchoMode.Password)
 
     def event(self, e: QtCore.QEvent) -> bool:
-        if e.type() == e.HoverEnter:
+        if e.type() == e.Type.HoverEnter:
             self.onHoverEnter(e)
             return True
-        elif e.type() == e.HoverLeave:
+        elif e.type() == e.Type.HoverLeave:
             self.onHoverLeave(e)
             return True
 
         return super().event(e)
 
     def onHoverEnter(self, e: QtCore.QEvent):
-        self.setEchoMode(QLineEdit.Normal)
+        self.setEchoMode(QLineEdit.EchoMode.Normal)
 
     def onHoverLeave(self, e: QtCore.QEvent):
-        self.setEchoMode(QLineEdit.Password)
+        self.setEchoMode(QLineEdit.EchoMode.Password)

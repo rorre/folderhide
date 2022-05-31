@@ -1,7 +1,7 @@
 import os
 from typing import Optional
 
-from PyQt5.QtWidgets import (
+from PyQt6.QtWidgets import (
     QDialogButtonBox,
     QFileDialog,
     QGridLayout,
@@ -96,8 +96,8 @@ class Unhide(QWidget):
         resetButton.clicked.connect(self._reset)
 
         self.buttonArea = QDialogButtonBox()
-        self.buttonArea.addButton(startButton, QDialogButtonBox.ActionRole)
-        self.buttonArea.addButton(resetButton, QDialogButtonBox.ResetRole)
+        self.buttonArea.addButton(startButton, QDialogButtonBox.ButtonRole.ActionRole)
+        self.buttonArea.addButton(resetButton, QDialogButtonBox.ButtonRole.ResetRole)
 
     def createLogArea(self):
         self.logArea = QTextEdit()

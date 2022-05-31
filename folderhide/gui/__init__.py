@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QApplication, QMainWindow, QTabWidget
+from PyQt6.QtWidgets import QApplication, QMainWindow, QTabWidget
 
 from folderhide.gui.hide import Hide
 from folderhide.gui.unhide import Unhide
@@ -24,4 +24,4 @@ def run(args):
     app = QApplication(args)
     win = Main()
     win.show()
-    app.exec_()
+    app.exec()
