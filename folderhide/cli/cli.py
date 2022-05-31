@@ -139,7 +139,7 @@ def unhide(ctx: CLIContext, password: str, config: str):
             dest: str
             for dest, src in bar:
                 move_file(src, dest, ctx.obj["debug"])
-                restored_data.append((src, dest))
+                restored_data.append(FileMetadata(src, dest))
     except Exception:
         error("An error has occured.")
         traceback.print_exc()

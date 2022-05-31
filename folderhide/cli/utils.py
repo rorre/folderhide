@@ -1,8 +1,10 @@
 import shutil
 from pathlib import Path
-from typing import List, Tuple, Union
+from typing import List, Union
 
 import click
+
+from folderhide.utils import FileMetadata
 
 PathType = Union[str, Path]
 
@@ -30,7 +32,7 @@ def move_file(src: PathType, dest: PathType, dbg: bool):
     shutil.move(src, dest)
 
 
-def revert(datas: List[Tuple[str, str]], dbg: bool = False):
+def revert(datas: List[FileMetadata], dbg: bool = False):
     info("Reverting files")
     for dest, src in datas:
         move_file(src, dest, dbg)
