@@ -1,5 +1,6 @@
 import random
 import string
+import shutil
 from pathlib import Path
 from typing import List, Optional, Union, cast, NamedTuple
 
@@ -8,6 +9,9 @@ from Crypto.Protocol.KDF import scrypt
 
 random.seed("folderhide")
 salt = random.randbytes(16)
+
+
+PathType = Union[str, Path]
 
 
 class FileMetadata(NamedTuple):
@@ -25,7 +29,7 @@ def get_crypto(password: str, nonce: Optional[bytes] = None):
     return cipher
 
 
-def get_all_files(dir: Union[str, Path]):
+def get_all_files(dir: PathType, base_path: PathType):
     if isinstance(dir, str):
         working_dir = Path(dir)
     else:
@@ -34,9 +38,9 @@ def get_all_files(dir: Union[str, Path]):
     files: List[str] = []
     for d in working_dir.iterdir():
         if d.is_dir():
-            files.extend(get_all_files(d))
+            files.extend(get_all_files(d, base_path))
         else:
-            files.append(str(d))
+            files.append(str(d.relative_to(base_path)))
 
     return files
 
@@ -64,3 +68,9 @@ def generate_config(files: List[str], target_dir: Path):
         used_strs.append(new_fname)
 
     return output_datas
+
+
+def move_file(src: PathType, dest: PathType):
+    target_path = Path(dest)
+    target_path.parent.mkdir(parents=True, exist_ok=True)
+    shutil.move(src, dest)

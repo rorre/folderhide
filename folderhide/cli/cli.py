@@ -1,20 +1,9 @@
-import json
-import os
-import sys
-import traceback
-from pathlib import Path
-
 import click
 
-from folderhide.cli.utils import debug, error, info, move_file, revert
-from folderhide.typing import CLIContext, MoveData
-from folderhide.utils import (
-    FileMetadata,
-    generate_config,
-    get_all_files,
-    get_crypto,
-    random_str,
-)
+from folderhide.core import hide as hide_core
+from folderhide.core import unhide as unhide_core
+from folderhide.cli.utils import debug, error, info
+from folderhide.typing import CLIContext
 
 
 @click.group()
@@ -51,52 +40,11 @@ def cli(ctx: CLIContext, dbg: bool):
 )
 @click.pass_context
 def hide(ctx: CLIContext, folder: str, password: str, output: str):
-    files = get_all_files(folder)
-    if ctx.obj["debug"]:
-        debug("Total files: " + str(len(files)))
+    def on_debug(x: str):
+        if ctx.obj["debug"]:
+            debug(x)
 
-    target_dir = Path("." + random_str(8))
-    target_dir.mkdir(exist_ok=True)
-    info("Target directory: " + str(target_dir))
-
-    if sys.platform == "win32":
-        import ctypes
-
-        info("WIN: Marking folder as hidden")
-        ctypes.windll.kernel32.SetFileAttributesW(str(target_dir.resolve()), 0x2)
-
-    info("Generating paths")
-    output_datas = generate_config(files, target_dir)
-
-    cipher = get_crypto(password)
-    if not ctx.obj["debug"]:
-        info("Encrypting config")
-        text, tag = cipher.encrypt_and_digest(json.dumps(output_datas).encode())
-    else:
-        text, tag = (json.dumps(output_datas).encode(), "empty16bytesdata".encode())
-
-    info("Writing config")
-    with open(output, "wb") as f:
-        [f.write(x) for x in (cipher.nonce, tag, text)]
-
-    info("Hiding files")
-    try:
-        with click.progressbar(output_datas, width=0, show_pos=True) as bar:
-            cfg: FileMetadata
-            for cfg in bar:
-                move_file(cfg.original, cfg.modified, ctx.obj["debug"])
-
-    except Exception:
-        error("An exception has occured.")
-        traceback.print_exc()
-        revert(output_datas, ctx.obj["debug"])
-        return
-
-    info("Done!")
-    info("Config available at: " + output)
-    info("Hidden folder: " + str(target_dir))
-    info("Please keep this file safe. This file is important for the unhide process.")
-    info("The file also needs to be in the same directory as the folder.")
+    hide_core(folder, password, output, info, on_debug, error)
 
 
 @cli.command(name="unhide", help="Unhide the folder from config.")
@@ -114,38 +62,8 @@ def hide(ctx: CLIContext, folder: str, password: str, output: str):
 )
 @click.pass_context
 def unhide(ctx: CLIContext, password: str, config: str):
-    info("Reading config")
-    with open(config, "rb") as f:
-        nonce, tag, ciphertext = [f.read(x) for x in (16, 16, -1)]
-    cipher = get_crypto(password, nonce=nonce)
+    def on_debug(x: str):
+        if ctx.obj["debug"]:
+            debug(x)
 
-    if not ctx.obj["debug"]:
-        try:
-            info("Decrypting config")
-            text_data = cipher.decrypt_and_verify(ciphertext, tag)
-        except ValueError:
-            error("Wrong config password!")
-    else:
-        text_data = ciphertext
-
-    info("Loading config")
-    data: MoveData = json.loads(text_data.decode())
-
-    info("Unhiding files")
-    restored_data: MoveData = []
-    try:
-        with click.progressbar(data, width=0, show_pos=True) as bar:
-            src: str
-            dest: str
-            for dest, src in bar:
-                move_file(src, dest, ctx.obj["debug"])
-                restored_data.append(FileMetadata(src, dest))
-    except Exception:
-        error("An error has occured.")
-        traceback.print_exc()
-        revert(restored_data, ctx.obj["debug"])
-        return
-
-    os.rmdir(src[:9])
-    os.remove(config)
-    info("Done!")
+    unhide_core(password, config, info, on_debug, error)

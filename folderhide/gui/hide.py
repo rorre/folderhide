@@ -78,7 +78,7 @@ class Hide(QWidget):
             QMessageBox.critical(self, "Error", "Output config path is empty.")
             return
 
-        self.workingThread = HideThread(self.targetFolder, password)
+        self.workingThread = HideThread(self.targetFolder, password, self.targetPath)
         self.workingThread.total.connect(self.progressBar.setMaximum)
         self.workingThread.progress.connect(self.progressBar.setValue)
         self.workingThread.log.connect(self.logArea.append)
